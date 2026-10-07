@@ -36,7 +36,9 @@ model Session {
 model Registry {
   id         String         @id @default(cuid())
   shop       String         // which store it belongs to (e.g. rmn-home.myshopify.com)
-  customerId String         // the Shopify customer who owns it
+  customerId      String?   // linked Shopify customer (set later from the storefront)
+  registrantName  String
+  registrantEmail String
   title      String
   eventType  String         // "wedding" | "baby" | "housewarming" | "other"
   eventDate  DateTime?
