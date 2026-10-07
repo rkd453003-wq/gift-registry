@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
+// enough when changing adapters.
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+// A gift registry, e.g. "Sam & Alex's Wedding"
+model Registry {
+  id         String         @id @default(cuid())
+  shop       String         // which store it belongs to (e.g. rmn-home.myshopify.com)
+  customerId String         // the Shopify customer who owns it
+  title      String
+  eventType  String         // "wedding" | "baby" | "housewarming" | "other"
+  eventDate  DateTime?
+  slug       String         // used in the shareable link, e.g. /registry/sam-and-alex
+  isPublic   Boolean        @default(true)
+  items      RegistryItem[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@unique([shop, slug])
+  @@index([shop, customerId])
+}
+
+// A product on a registry, e.g. "Stand mixer, want 1"
+model RegistryItem {
+  id                String     @id @default(cuid())
+  registryId        String
+  registry          Registry   @relation(fields: [registryId], references: [id], onDelete: Cascade)
+  productId         String
+  variantId         String     // the exact size/colour option
+  quantityWanted    Int        @default(1)
+  quantityPurchased Int        @default(0)
+  purchases         Purchase[]
+  createdAt         DateTime   @default(now())
+
+  @@unique([registryId, variantId])
+}
+
+// A record that a guest bought an item, created from Shopify order webhooks
+model Purchase {
+  id        String       @id @default(cuid())
+  itemId    String
+  item      RegistryItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  orderId   String
+  quantity  Int
+  createdAt DateTime     @default(now())
+
+  @@unique([orderId, itemId])
+}
