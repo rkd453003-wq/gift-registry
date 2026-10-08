@@ -135,7 +135,9 @@ export default function Registries() {
             <s-table-body>
               {registries.map((r) => (
                 <s-table-row key={r.id}>
-                  <s-table-cell>{r.title}</s-table-cell>
+                  <s-table-cell>
+                    <s-link href={`/app/registries/${r.id}`}>{r.title}</s-link>
+                  </s-table-cell>
                   <s-table-cell>{r.registrantName}</s-table-cell>
                   <s-table-cell>
                     <s-badge>{r.eventType}</s-badge>
