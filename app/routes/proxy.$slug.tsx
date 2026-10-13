@@ -11,7 +11,7 @@ type VariantNode = {
   inventoryPolicy: "DENY" | "CONTINUE";
   inventoryItem: { tracked: boolean };
   image: { url: string } | null;
-  product: { title: string; onlineStoreUrl: string | null; featuredImage: { url: string } | null };
+  product: { title: string; status: string; featuredImage: { url: string } | null };
 };
 
 // Makes text safe to put inside HTML, so a product named "<script>"
@@ -84,7 +84,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
           inventoryPolicy
           inventoryItem { tracked }
           image { url }
-          product { title onlineStoreUrl featuredImage { url } }
+          product { title status featuredImage { url } }
         }
       }
     }`,
@@ -120,7 +120,7 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
       const image = variant.image?.url ?? variant.product.featuredImage?.url;
       const remaining = Math.max(0, item.quantityWanted - item.quantityPurchased);
             // Can a guest actually buy this right now?
-      const published = Boolean(variant.product.onlineStoreUrl);
+      const published = variant.product.status === "ACTIVE";
       const inStock =
         variant.availableForSale &&
         (!variant.inventoryItem.tracked ||
